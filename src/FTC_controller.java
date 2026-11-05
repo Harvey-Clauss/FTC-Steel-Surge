@@ -4,10 +4,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@TeleOp(name = "Steel Surge One Controller", group = "Steel Surge")
-public class NewCode2 extends LinearOpMode {
+@TeleOp(name = "Steel Surge One Controller-TEST", group = "Steel Surge")
+public class FTC_controller extends LinearOpMode {
 
     // wedge2_servo positions
     // HOME = starting position
@@ -22,58 +23,59 @@ public class NewCode2 extends LinearOpMode {
         // DRIVE MOTORS
         // ==========================================
 
-        DcMotor fl = hardwareMap.tryGet(DcMotor.class, "frontLeft");
-        DcMotor fr = hardwareMap.tryGet(DcMotor.class, "frontRight");
-        DcMotor bl = hardwareMap.tryGet(DcMotor.class, "backLeft");
-        DcMotor br = hardwareMap.tryGet(DcMotor.class, "backRight");
+        DcMotor wheel_frontLeft = hardwareMap.tryGet(DcMotor.class, "frontLeft");
+        DcMotor wheel_frontRight = hardwareMap.tryGet(DcMotor.class, "frontRight");
+        DcMotor wheel_backLeft = hardwareMap.tryGet(DcMotor.class, "backLeft");
+        DcMotor wheel_backRight = hardwareMap.tryGet(DcMotor.class, "backRight");
 
         // ==========================================
         // MECHANISM MOTORS
         // ==========================================
 
         DcMotor intake = hardwareMap.tryGet(DcMotor.class, "intake");
-        DcMotor midtake_1 = hardwareMap.tryGet(DcMotor.class, "midtake_1");
+        DcMotor midtake_Front = hardwareMap.tryGet(DcMotor.class, "midtake_1");
+        CRServo midtake_Back = hardwareMap.tryGet(CRServo.class, "midtake_2");
         DcMotor outakeLeft = hardwareMap.tryGet(DcMotor.class, "outakeLeft");
         DcMotor outakeRight = hardwareMap.tryGet(DcMotor.class, "outakeRight");
 
         DcMotor[] drive = {
-                fl,
-                fr,
-                bl,
-                br
+                wheel_frontLeft,
+                wheel_frontRight,
+                wheel_backLeft,
+                wheel_backRight
         };
 
         DcMotor[] mechanisms = {
                 intake,
-                midtake_1,
+                midtake_Front,
                 outakeLeft,
                 outakeRight
         };
 
         boolean driveReady =
-                fl != null &&
-                fr != null &&
-                bl != null &&
-                br != null;
+                wheel_frontLeft != null &&
+                wheel_frontRight != null &&
+                wheel_backLeft != null &&
+                wheel_backRight != null;
 
         // ==========================================
         // DRIVE MOTOR DIRECTIONS
         // ==========================================
 
-        if (fl != null) {
-            fl.setDirection(DcMotorSimple.Direction.REVERSE);
+        if (wheel_frontLeft != null) {
+            wheel_frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         }
 
-        if (bl != null) {
-            bl.setDirection(DcMotorSimple.Direction.FORWARD);
+        if (wheel_backLeft != null) {
+            wheel_backLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         }
 
-        if (fr != null) {
-            fr.setDirection(DcMotorSimple.Direction.REVERSE);
+        if (wheel_frontRight != null) {
+            wheel_frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
         }
 
-        if (br != null) {
-            br.setDirection(DcMotorSimple.Direction.FORWARD);
+        if (wheel_backRight != null) {
+            wheel_backRight.setDirection(DcMotorSimple.Direction.FORWARD);
         }
 
         // ==========================================
@@ -113,46 +115,11 @@ public class NewCode2 extends LinearOpMode {
         }
 
         // ==========================================
-        // SERVOS
-        // ==========================================
-
-        Servo wedgeServo =
-                hardwareMap.get(
-                        Servo.class,
-                        "wedge_servo"
-                );
-
-        Servo wedge2Servo =
-                hardwareMap.get(
-                        Servo.class,
-                        "wedge2_servo"
-                );
-
-        /*
-         * IMPORTANT:
-         *
-         * Do NOT set wedge2Servo position here.
-         *
-         * This prevents the servo from moving
-         * when the program starts.
-         */
-
-        // false = servo is considered at HOME
-        // true = servo has moved approximately 90 degrees
-        boolean wedge2Active = false;
-
-        // Used to detect a NEW press of B
-        boolean previousB = false;
-
-        // Used only for telemetry
-        boolean wedge2HasBeenCommanded = false;
-
-        // ==========================================
         // INITIAL TELEMETRY
         // ==========================================
 
-	 telemtry.addData("Gamepad1", gamepad1 == null ? "MISSING" : "OK")
-	 telemtry.addData("Gamepad2", gamepad2 == null ? "MISSING" : "OK")
+     telemetry.addData("Gamepad1", gamepad1 == null ? "MISSING" : "OK");
+     telemetry.addData("Gamepad2", gamepad2 == null ? "MISSING" : "OK");
 
         telemetry.addData(
                 "Drive",
@@ -165,9 +132,10 @@ public class NewCode2 extends LinearOpMode {
         );
 
         telemetry.addData(
-                "midtake",
-                midtake == null ? "MISSING" : "OK"
+                "front_midtake",
+                midtake_Front == null ? "MISSING" : "OK"
         );
+        telemetry.addData("back_midtake", midtake_Back == null ? "MISSING" : "OK");
 
         telemetry.addData(
                 "outakeLeft",
@@ -179,15 +147,7 @@ public class NewCode2 extends LinearOpMode {
                 outakeRight == null ? "MISSING" : "OK"
         );
 
-        telemetry.addData(
-                "wedge2_servo",
-                "READY"
-        );
 
-        telemetry.addData(
-                "Wedge 2",
-                "Press B to move"
-        );
 
         telemetry.update();
 
@@ -313,6 +273,7 @@ public class NewCode2 extends LinearOpMode {
         try {
 
             while (opModeIsActive()) {
+                //#region Drive
 
                 // ==========================================
                 // DRIVE
@@ -337,22 +298,22 @@ public class NewCode2 extends LinearOpMode {
                                             + Math.abs(turn)
                             );
 
-                    double pfl =
+                    double power_fl =
                             (forward + strafe + turn)
                                     / divisor
                                     * 0.80;
 
-                    double pfr =
+                    double power_fr =
                             (forward - strafe - turn)
                                     / divisor
                                     * 0.80;
 
-                    double pbl =
+                    double power_bl =
                             (forward - strafe + turn)
                                     / divisor
                                     * 0.80;
 
-                    double pbr =
+                    double power_br =
                             (forward + strafe - turn)
                                     / divisor
                                     * 0.80;
@@ -368,91 +329,34 @@ public class NewCode2 extends LinearOpMode {
                             gamepad1.dpad_down
                     ) {
 
-                        pfl =
+                        power_fl =
                                 gamepad1.dpad_up
                                         ? 0.20
                                         : 0.0;
 
-                        pfr =
+                        power_fr =
                                 gamepad1.dpad_right
                                         ? 0.20
                                         : 0.0;
 
-                        pbl =
+                        power_bl =
                                 gamepad1.dpad_left
                                         ? 0.20
                                         : 0.0;
 
-                        pbr =
+                        power_br =
                                 gamepad1.dpad_down
                                         ? 0.20
                                         : 0.0;
                     }
 
-                    fl.setPower(pfl);
-                    fr.setPower(pfr);
-                    bl.setPower(pbl);
-                    br.setPower(pbr);
+                    wheel_frontLeft.setPower(power_fl);
+                    wheel_frontRight.setPower(power_fr);
+                    wheel_backLeft.setPower(power_bl);
+                    wheel_backRight.setPower(power_br);
                 }
-
-                // ==========================================
-                // ORIGINAL WEDGE SERVO
-                //
-                // LEFT BUMPER = 0.0
-                // RIGHT BUMPER = 1.0
-                // ==========================================
-
-                if (gamepad1.left_bumper) {
-
-                    wedgeServo.setPosition(0.0);
-
-                } else if (gamepad1.right_bumper) {
-
-                    wedgeServo.setPosition(1.0);
-                }
-
-                // ==========================================
-                // WEDGE 2 SERVO
-                //
-                // PRESS B #1:
-                // Move approximately 90 degrees
-                //
-                // PRESS B #2:
-                // Return to original position
-                //
-                // PRESS B #3:
-                // Move 90 degrees again
-                // ==========================================
-
-                if (gamepad1.b && !previousB) {
-
-                    if (!wedge2Active) {
-
-                        // FIRST PRESS
-                        // Move approximately 90 degrees
-                        wedge2Servo.setPosition(
-                                WEDGE2_ACTIVE
-                        );
-
-                        wedge2Active = true;
-
-                    } else {
-
-                        // SECOND PRESS
-                        // Return to original position
-                        wedge2Servo.setPosition(
-                                WEDGE2_HOME
-                        );
-
-                        wedge2Active = false;
-                    }
-
-                    wedge2HasBeenCommanded = true;
-                }
-
-                // Remember B state for next loop
-                previousB = gamepad1.b;
-
+//#endregion
+                
                 // ==========================================
                 // INTAKE / MIDTAKE
                 //
@@ -460,42 +364,28 @@ public class NewCode2 extends LinearOpMode {
                 // ==========================================
 
                 double intakePower = 0.0;
-                double midtakePower = 0.0;
-
-                if (gamepad1.a) {
-                    intakePower = 0.80;
-                }
-
-                if (gamepad1.y) {
-                	intakePower = -0.40;
-                }
-
-                if (gamepad1.x) {
-                	midtakePower = -0.40;
-                }
-                
-
-                // ==========================================
-                // OUTAKE
-                // ==========================================
-
+                double f_midtakePower = 0.0;
+                double b_midtakePower = 0.0;
                 double outakePower = 0.0;
 
-                if (
-                        gamepad1.right_trigger > 0.20 &&
-                        gamepad1.left_trigger <= 0.20
-                ) {
 
-                    outakePower = 0.45;
-
-                } else if (
-                        gamepad1.left_trigger > 0.20 &&
-                        gamepad1.right_trigger <= 0.20
-                ) {
-
-                    outakePower = -0.50;
+                //Intake controls
+                if (gamepad2.right_trigger >= .20) {
+                        intakePower = 0.80;
+                }
+                if (gamepad2.right_bumper) {
+                        intakePower = -0.40;
                 }
 
+                //Midtake controls
+                if (Math.abs(gamepad2.left_stick_y) >= .55) f_midtakePower = .80 * Math.signum(gamepad2.left_stick_y);
+                if (Math.abs(gamepad2.left_stick_x) >= .55) b_midtakePower = .80 * Math.signum(gamepad2.left_stick_x);
+
+                //Outake controls
+                if (gamepad2.left_trigger >= .20){
+                        outakePower = .45;
+                }
+                
                 // ==========================================
                 // APPLY MECHANISM POWER
                 // ==========================================
@@ -505,9 +395,14 @@ public class NewCode2 extends LinearOpMode {
                     intake.setPower(intakePower);
                 }
 
-                if (midtake != null) {
+                if (midtake_Front != null) {
 
-                    midtake.setPower(midtakePower);
+                    midtake_Front.setPower(f_midtakePower);
+                }
+                if (midtake_Back != null) {
+
+                    midtake_Back.setPower(b_midtakePower);
+                    //midtake_Back.setPosition(b_midtakePower);
                 }
 
                 if (outakeLeft != null) {
@@ -534,51 +429,18 @@ public class NewCode2 extends LinearOpMode {
                 );
 
                 telemetry.addData(
-                        "Midtake",
-                        midtakePower
+                        "front_Midtake",
+                        f_midtakePower
+                );
+                telemetry.addData(
+                        "back_Midtake",
+                        b_midtakePower
                 );
 
                 telemetry.addData(
                         "Outake",
                         outakePower
                 );
-
-                telemetry.addData(
-                        "B Button",
-                        gamepad1.b
-                );
-
-                if (!wedge2HasBeenCommanded) {
-
-                    telemetry.addData(
-                            "Wedge 2",
-                            "WAITING FOR FIRST B PRESS"
-                    );
-
-                } else if (wedge2Active) {
-
-                    telemetry.addData(
-                            "Wedge 2",
-                            "90 DEGREE POSITION"
-                    );
-
-                    telemetry.addData(
-                            "Wedge 2 Position",
-                            WEDGE2_ACTIVE
-                    );
-
-                } else {
-
-                    telemetry.addData(
-                            "Wedge 2",
-                            "HOME POSITION"
-                    );
-
-                    telemetry.addData(
-                            "Wedge 2 Position",
-                            WEDGE2_HOME
-                    );
-                }
 
                 telemetry.update();
 
@@ -606,13 +468,7 @@ public class NewCode2 extends LinearOpMode {
                     motor.setPower(0);
                 }
             }
-
-            /*
-             * Do NOT command wedge2Servo here.
-             *
-             * This prevents the servo from moving
-             * automatically when the program stops.
-             */
+            //if (midtake_Back != null) midtake_Back.setPower(0);
         }
     }
 }
