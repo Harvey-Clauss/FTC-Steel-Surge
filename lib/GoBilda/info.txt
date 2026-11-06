@@ -1,0 +1,110 @@
+The library contains all of the CAD files for Gobilda parts used on the FTC Steel Surge robotics team.
+
+#INCOMPLETE
+#TODO:
+#  1. Complete file structure
+#  2. Download and compress all STEP files.
+
+GOBilda STEP Library/
+├── Structure/
+│   ├── Channels/
+│   │   ├── 1120
+│   │   ├── 1121
+│   │   └── 1143
+│   ├── GoRail®/
+│   │   ├── 1109
+│   │   ├── 1118
+│   │   └── Misc
+│   ├── Beams/
+│   │   ├── 1101
+│   │   ├── 1103
+│   │   ├── 1102
+│   │   └── 1106
+│   ├── Shafting & Tubing/
+│   │   ├── SSRS/
+│   │   │   ├── 06
+│   │   │   ├── 08
+│   │   │   └── 12
+│   │   ├── SSDS
+│   │   ├── SSRXS/
+│   │   │   ├── 2106
+│   │   │   ├── 2109
+│   │   │   └── 2102
+│   │   ├── ASRXS/
+│   │   │   ├── 2104
+│   │   │   └── 1516  
+│   │   ├── HS
+│   │   ├── AT/
+│   │   │   ├── 0608
+│   │   │   ├── 0810
+│   │   │   ├── 1012
+│   │   │   ├── 1214
+│   │   │   └── 2732
+│   │   ├── GoTUBE
+│   │   ├── FAT
+│   │   └── ATSN 
+│   ├── Mounts/
+│   │   ├── BM
+│   │   ├── DBM
+│   │   ├── QBPM
+│   │   ├── 1.2PPM
+│   │   ├── 2.2PPM
+│   │   ├── APM
+│   │   ├── GAM
+│   │   ├── FM
+│   │   ├── SM
+│   │   ├── CM
+│   │   ├── MM
+│   │   └── SM
+│   ├── Clamping Mounts
+│   ├── Grid Plates
+│   ├── Pattern Plates
+│   ├── Brackets
+│   ├── Base Plates
+│   ├── Pattern Adapters
+│   ├── Pattern Spacers
+│   ├── Standoffs & Spacers
+│   ├── Threaded Plates
+│   └── Hinges
+├── Motion/
+│   ├── Motors
+│   ├── Servos
+│   ├── Linear Servo
+│   ├── Wheels & Tires
+│   ├── Intake
+│   ├── Tracks
+│   ├── Gears
+│   ├── Sprockets & Chain
+│   ├── Timing Belts & Pulleys
+│   ├── Cable & Pulleys
+│   ├── Lead Screws
+│   ├── Linear Slides
+│   ├── Linear Motion Guides
+│   ├── Hubs
+│   ├── Bearings
+│   ├── Turrets
+│   ├── Shafting & Tubing
+│   ├── Standoffs & Spacers
+│   ├── Shaft Spacers
+│   ├── Collars
+│   ├── Couplers
+│   ├── CV & Universal Joints
+│   ├── Shocks
+│   ├── Control Arms
+│   ├── Linkages & Threaded Arms
+│   └── Hinges
+└── Electronics/
+    ├── Motor Controllers
+    ├── Servo Electronics
+    ├── Sensors
+    ├── Cameras
+    ├── Odometry
+    ├── Transmitters/Recievers
+    ├── Signal Mixers
+    ├── Batteries
+    ├── Voltage Regulators
+    ├── Power Distribution Boards
+    ├── Wiring
+    ├── Switches
+    ├── Lights
+    └── Fuses
