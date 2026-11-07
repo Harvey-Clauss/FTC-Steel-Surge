@@ -119,11 +119,7 @@ public class FTC_controller extends LinearOpMode {
         //#region IMU SETUP
         //Currently unused code for IMU telemetry. Can be used to track robot rotation and tilt.
         if (IMU_Telemetry) {
-            com.qualcomm.robotcore.hardware.IMU sensor
-                    = hardwareMap.tryGet(
-                            com.qualcomm.robotcore.hardware.IMU.class,
-                            "imu"
-                    );
+            com.qualcomm.robotcore.hardware.IMU sensor = hardwareMap.tryGet(com.qualcomm.robotcore.hardware.IMU.class, "imu");
 
             if (sensor != null) {
 
@@ -154,59 +150,29 @@ public class FTC_controller extends LinearOpMode {
 
                             try {
 
-                                org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles a
-                                        = sensor.getRobotYawPitchRollAngles();
+                                org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles a = sensor.getRobotYawPitchRollAngles();
 
-                                org.firstinspires.ftc.robotcore.external.navigation.AngleUnit unit
-                                        = org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
+                                org.firstinspires.ftc.robotcore.external.navigation.AngleUnit unit = org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
 
-                                double yaw
-                                        = a.getYaw(unit);
+                                double yaw = a.getYaw(unit);
 
-                                double tilt
-                                        = Math.hypot(
-                                                a.getPitch(unit),
-                                                a.getRoll(unit)
-                                        );
+                                double tilt = Math.hypot(a.getPitch(unit), a.getRoll(unit));
 
-                                double turnSpeed
-                                        = Math.abs(
-                                                sensor
-                                                        .getRobotAngularVelocity(unit).zRotationRate
-                                        );
+                                double turnSpeed = Math.abs(sensor.getRobotAngularVelocity(unit).zRotationRate);
 
-                                if (!Double.isNaN(lastYaw)) {
-
-                                    totalRotation
-                                            += Math.abs(
-                                                    Math.IEEEremainder(
-                                                            yaw - lastYaw,
-                                                            360
-                                                    )
-                                            );
-                                }
-
+                                if (!Double.isNaN(lastYaw)) totalRotation += Math.abs(Math.IEEEremainder(yaw - lastYaw, 360));
+                                
                                 lastYaw = yaw;
 
-                                maximumTilt
-                                        = Math.max(
-                                                maximumTilt,
-                                                tilt
-                                        );
+                                maximumTilt = Math.max(maximumTilt, tilt);
 
-                                maximumTurnSpeed
-                                        = Math.max(
-                                                maximumTurnSpeed,
-                                                turnSpeed
-                                        );
+                                maximumTurnSpeed = Math.max(maximumTurnSpeed, turnSpeed);
 
-                            } catch (RuntimeException ignored) {
-                            }
+                            } catch (RuntimeException ignored){}
                         }
                     });
 
-                } catch (RuntimeException ignored) {
-                }
+                } catch (RuntimeException ignored) {}
             }
         }
         //#endregion
@@ -268,34 +234,24 @@ public class FTC_controller extends LinearOpMode {
                 
                 final float midtake_deadzone = .55; // Range: (0.0-1.0) Extreme values are not recommended. This is the deadzone for the midtake motors. The midtake motors will not run unless the stick is pushed past this value.
 
-
                 //Direction is controlled by stick direction UP & RIGHT is POSTIVE.
                 if (Math.abs(gamepad2.left_stick_y) >= midtake_deadzone) f_midtakePower = .80 * Math.signum(gamepad2.left_stick_y); //Forward midtake
                 if (Math.abs(gamepad2.left_stick_x) >= midtake_deadzone) b_midtakePower = .80 * Math.signum(gamepad2.left_stick_x); //Back midtake
                 
-
                 //Outake controls
-                if (gamepad2.left_trigger >= .20) {
-                    outakePower = .45;
-                }
+                if (gamepad2.left_trigger >= .20) outakePower = .45;
 
                 // ==========================================
                 // APPLY MECHANISM POWER
                 // ==========================================
                 if (intake != null) intake.setPower(intakePower);
                 
-
-                if (midtake_Front != null) midtake_Front.setPower(f_midtakePower);
-                
+                if (midtake_Front != null) midtake_Front.setPower(f_midtakePower);          
                 if (midtake_Back != null) midtake_Back.setPower(b_midtakePower);
 
-
-                if (outakeLeft != null) outakeLeft.setPower(-outakePower);
-                
-
+                if (outakeLeft != null) outakeLeft.setPower(-outakePower);            
                 if (outakeRight != null) outakeRight.setPower(outakePower);
                 
-
                 // ==========================================
                 // TELEMETRY
                 // ==========================================
