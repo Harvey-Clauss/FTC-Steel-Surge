@@ -12,21 +12,11 @@ public class FTC_TeleOp extends LinearOpMode {
 
     //Custom clamp function
     public static double clamp(double val, double min, double max) { return (double)Math.max(min, (double)Math.min(max, val)); } 
+    public DriveTrain driveTrain;
 
     @Override
     public void runOpMode() {
-
-        /*
-                        DRIVE MOTORS:
-                        gets all four movement wheels.
-                
-                !!MUST BE USING "Steel Surge - Main" Configuration!!                   
-         */
-        DcMotor wheel_frontLeft = hardwareMap.tryGet(DcMotor.class, "frontLeft");
-        DcMotor wheel_frontRight = hardwareMap.tryGet(DcMotor.class, "frontRight");
-        DcMotor wheel_backLeft = hardwareMap.tryGet(DcMotor.class, "backLeft");
-        DcMotor wheel_backRight = hardwareMap.tryGet(DcMotor.class, "backRight");
-
+        driveTrain = new DriveTrain(this);
         /*
                         MECHANISM MOTORS:
                         gets all mechanism motors/servos.
@@ -39,12 +29,6 @@ public class FTC_TeleOp extends LinearOpMode {
         DcMotor outakeLeft = hardwareMap.tryGet(DcMotor.class, "outakeLeft");
         DcMotor outakeRight = hardwareMap.tryGet(DcMotor.class, "outakeRight");
 
-        DcMotor[] drive = {
-            wheel_frontLeft,
-            wheel_frontRight,
-            wheel_backLeft,
-            wheel_backRight
-        };
         
         //midtake_back is a CRServo and is not included in the mechanisms array. It is controlled separately.
         DcMotor[] mechanisms = {
@@ -53,31 +37,6 @@ public class FTC_TeleOp extends LinearOpMode {
             outakeLeft,
             outakeRight
         };
-
-        boolean driveReady = wheel_frontLeft != null && wheel_frontRight != null && wheel_backLeft != null && wheel_backRight != null;
-
-        // ==========================================
-        // DRIVE MOTOR DIRECTIONS
-        // ==========================================
-        if (wheel_frontLeft != null) wheel_frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);      
-
-        if (wheel_backLeft != null) wheel_backLeft.setDirection(DcMotorSimple.Direction.FORWARD);
- 
-        if (wheel_frontRight != null) wheel_frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
-        
-        if (wheel_backRight != null) wheel_backRight.setDirection(DcMotorSimple.Direction.FORWARD);
-        
-        // ==========================================
-        // DRIVE MOTOR SETUP
-        // ==========================================      
-        for (DcMotor motor : drive) {
-            if (motor != null) {
-                motor.setMode( DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-                motor.setPower(0);
-            }
-        }
 
         // ==========================================
         // MECHANISM MOTOR SETUP
@@ -96,7 +55,7 @@ public class FTC_TeleOp extends LinearOpMode {
         telemetry.addData("Gamepad1", gamepad1 == null ? "MISSING" : "OK");
         telemetry.addData("Gamepad2", gamepad2 == null ? "MISSING" : "OK");
 
-        telemetry.addData("Drive", driveReady ? "READY" : "MISSING MOTOR");
+        telemetry.addData("Drive", driveTrain != null && driveTrain.DriveReady ? "READY" : "MISSING MOTOR");
 
         telemetry.addData("Intake", intake == null ? "MISSING" : "OK" );
 
@@ -128,7 +87,7 @@ public class FTC_TeleOp extends LinearOpMode {
                 // ==========================================
                 // DRIVE
                 // ==========================================
-                if (driveReady) {
+                if (driveTrain != null && driveTrain.DriveReady) {
 
                     double powerMultiplier = .80; // Changes range. Ex: powerMultiplier = .8 -> Range: -0.8 to 0.8 
                     double slowSpeed = .20; //D-pad speed
@@ -144,21 +103,16 @@ public class FTC_TeleOp extends LinearOpMode {
                     // Each of these evaluates to a number within the range -1.0 to 1.0 inclusively
                     // When d-pad binds are not being pressed stick inputers are used. Otherwise is uses the "slowSpeed"
                     // variable
-                    double power_fl = !gamepad1.dpad_up ? (forward + strafe + turn) / divisor * powerMultiplier : slowSpeed;
-
-                    double power_fr = !gamepad1.dpad_right ? (forward - strafe - turn) / divisor * powerMultiplier : slowSpeed;
-
-                    double power_bl = !gamepad1.dpad_left ? (forward - strafe + turn) / divisor * powerMultiplier : slowSpeed;
-
-                    double power_br = !gamepad1.dpad_down ? (forward + strafe - turn) / divisor * powerMultiplier: slowSpeed;
+                    double[] powers = new double[4];
+                    powers[0] = !gamepad1.dpad_up ? (forward + strafe + turn) / divisor * powerMultiplier : slowSpeed;
+                    powers[1] = !gamepad1.dpad_right ? (forward - strafe - turn) / divisor * powerMultiplier : slowSpeed;
+                    powers[2] = !gamepad1.dpad_left ? (forward - strafe + turn) / divisor * powerMultiplier : slowSpeed;
+                    powers[3] = !gamepad1.dpad_down ? (forward + strafe - turn) / divisor * powerMultiplier: slowSpeed;
 
                     telemetry.addData("Drive x-value", gamepad1.left_stick_x);
                     telemetry.addData("Drive y-value", gamepad1.left_stick_y);
 
-                    wheel_frontLeft.setPower(power_fl);
-                    wheel_frontRight.setPower(power_fr);
-                    wheel_backLeft.setPower(power_bl);
-                    wheel_backRight.setPower(power_br);
+                    driveTrain.setPower(powers);
                 }
 //#endregion
 
@@ -217,7 +171,7 @@ public class FTC_TeleOp extends LinearOpMode {
             // ==========================================
             // STOP ALL MOTORS
             // ==========================================
-            for (DcMotor motor : drive) if (motor != null) motor.setPower(0); //Drive motors are set to 0 power when the opmode is stopped.
+            if (driveTrain != null) driveTrain.stop(); //Drive motors are set to 0 power when the opmode is stopped.
                          
             for (DcMotor motor : mechanisms) if (motor != null) motor.setPower(0); //Mechanism motors are set to 0 power when the opmode is stopped.
                        
