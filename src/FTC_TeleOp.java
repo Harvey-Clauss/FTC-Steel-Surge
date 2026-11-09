@@ -8,9 +8,10 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @TeleOp(name = "Main - Controller", group = "Steel Surge")
-public class FTC_controller extends LinearOpMode {
+public class FTC_TeleOp extends LinearOpMode {
 
-    public static final boolean IMU_Telemetry = true;
+    //Custom clamp function
+    public static double clamp(double val, double min, double max) { return (double)Math.max(min, (double)Math.min(max, val)); } 
 
     @Override
     public void runOpMode() {
@@ -116,70 +117,9 @@ public class FTC_controller extends LinearOpMode {
             return;
         }
 
-        //#region IMU SETUP
-        //Currently unused code for IMU telemetry. Can be used to track robot rotation and tilt.
-        if (IMU_Telemetry) {
-            com.qualcomm.robotcore.hardware.IMU sensor = hardwareMap.tryGet(com.qualcomm.robotcore.hardware.IMU.class, "imu");
-
-            if (sensor != null) {
-
-                try {
-
-                    sensor.initialize(
-                            new com.qualcomm.robotcore.hardware.IMU.Parameters(
-                                    new com.qualcomm.hardware.rev.RevHubOrientationOnRobot(
-                                            com.qualcomm.hardware.rev.RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                                            com.qualcomm.hardware.rev.RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
-                                    )
-                            )
-                    );
-
-                    telemetry.addAction(new Runnable() {
-
-                        double lastYaw = Double.NaN;
-                        double totalRotation = 0;
-                        double maximumTilt = 0;
-                        double maximumTurnSpeed = 0;
-
-                        @Override
-                        public void run() {
-
-                            if (!opModeIsActive()) {
-                                return;
-                            }
-
-                            try {
-
-                                org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles a = sensor.getRobotYawPitchRollAngles();
-
-                                org.firstinspires.ftc.robotcore.external.navigation.AngleUnit unit = org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
-
-                                double yaw = a.getYaw(unit);
-
-                                double tilt = Math.hypot(a.getPitch(unit), a.getRoll(unit));
-
-                                double turnSpeed = Math.abs(sensor.getRobotAngularVelocity(unit).zRotationRate);
-
-                                if (!Double.isNaN(lastYaw)) totalRotation += Math.abs(Math.IEEEremainder(yaw - lastYaw, 360));
-                                
-                                lastYaw = yaw;
-
-                                maximumTilt = Math.max(maximumTilt, tilt);
-
-                                maximumTurnSpeed = Math.max(maximumTurnSpeed, turnSpeed);
-
-                            } catch (RuntimeException ignored){}
-                        }
-                    });
-
-                } catch (RuntimeException ignored) {}
-            }
-        }
-        //#endregion
         // ==========================================
         // MAIN LOOP
         // ==========================================
-
         try {
 
             while (opModeIsActive()) {
@@ -190,24 +130,30 @@ public class FTC_controller extends LinearOpMode {
                 // ==========================================
                 if (driveReady) {
 
-                    double powerMultiplier = .80;
-                    double slowSpeed = .20;
+                    double powerMultiplier = .80; // Changes range. Ex: powerMultiplier = .8 -> Range: -0.8 to 0.8 
+                    double slowSpeed = .20; //D-pad speed
 
                     double forward = -gamepad1.left_stick_y;
 
                     double strafe = gamepad1.left_stick_x;
 
-                    double turn = gamepad1.right_stick_x;
+                    double turn = (Math.abs(gamepad1.right_stick_x) >= .2) ? gamepad1.right_stick_x : 0.0;
 
-                    double divisor = Math.max(1.0, Math.abs(forward) + Math.abs(strafe) + Math.abs(turn)) * powerMultiplier;
+                    double divisor = Math.max(1.0, Math.abs(forward) + Math.abs(strafe) + Math.abs(turn)); //Maintains -1.0 to 1.0 range
 
-                    double power_fl = gamepad1.dpad_up ? slowSpeed : (forward + strafe + turn) / divisor;
+                    // Each of these evaluates to a number within the range -1.0 to 1.0 inclusively
+                    // When d-pad binds are not being pressed stick inputers are used. Otherwise is uses the "slowSpeed"
+                    // variable
+                    double power_fl = !gamepad1.dpad_up ? (forward + strafe + turn) / divisor * powerMultiplier : slowSpeed;
 
-                    double power_fr = gamepad1.dpad_right ? slowSpeed : (forward - strafe - turn) / divisor;
+                    double power_fr = !gamepad1.dpad_right ? (forward - strafe - turn) / divisor * powerMultiplier : slowSpeed;
 
-                    double power_bl = gamepad1.dpad_left ? slowSpeed : (forward - strafe + turn) / divisor;
+                    double power_bl = !gamepad1.dpad_left ? (forward - strafe + turn) / divisor * powerMultiplier : slowSpeed;
 
-                    double power_br = gamepad1.dpad_down ? slowSpeed : (forward + strafe - turn) / divisor;
+                    double power_br = !gamepad1.dpad_down ? (forward + strafe - turn) / divisor * powerMultiplier: slowSpeed;
+
+                    telemetry.addData("Drive x-value", gamepad1.left_stick_x);
+                    telemetry.addData("Drive y-value", gamepad1.left_stick_y);
 
                     wheel_frontLeft.setPower(power_fl);
                     wheel_frontRight.setPower(power_fr);
@@ -232,7 +178,7 @@ public class FTC_controller extends LinearOpMode {
                 
                 //Can be used is sync by applying diagonal force
                 
-                final float midtake_deadzone = .55; // Range: (0.0-1.0) Extreme values are not recommended. This is the deadzone for the midtake motors. The midtake motors will not run unless the stick is pushed past this value.
+                final double midtake_deadzone = .55; // Range: (0.0-1.0) Extreme values are not recommended. This is the deadzone for the midtake motors. The midtake motors will not run unless the stick is pushed past this value.
 
                 //Direction is controlled by stick direction UP & RIGHT is POSTIVE.
                 if (Math.abs(gamepad2.left_stick_y) >= midtake_deadzone) f_midtakePower = .80 * Math.signum(gamepad2.left_stick_y); //Forward midtake
@@ -257,8 +203,8 @@ public class FTC_controller extends LinearOpMode {
                 // ==========================================
                 telemetry.addData("Intake", intakePower);
 
-                telemetry.addData("front_Midtake", f_midtakePower);
-                telemetry.addData("back_Midtake", b_midtakePower);
+                telemetry.addData("Front Midtake", f_midtakePower);
+                telemetry.addData("Back Midtake", b_midtakePower);
 
                 telemetry.addData("Outake", outakePower);
 
