@@ -1,5 +1,5 @@
 {
-  "java.import.gradle.enabled": false,
+  "java.import.gradle.enabled": true,
   "java.import.gradle.java.home": "/usr/lib/jvm/msopenjdk-current",
   "java.project.sourcePaths": [
     "src/main/java"

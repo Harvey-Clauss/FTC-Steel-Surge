@@ -164,9 +164,17 @@ public class DriveTrain {
         backLeft.setPower(powers[2]);
         backRight.setPower(powers[3]);
     }
+    /**
+     * Applies the specified movement values to the drivetrain motors with the given power.
+     * @param moveValue contains the direction values for each motor in the drivetrain
+     * @param power magnitude of power to apply to the motors (0.0 to 1.0)
+     * @author Harvey Clauss
+     * @apiNote This method applies power magnitude uniformly to all motors based on the provided movement values.
+     * @see #moveValues
+     */
     private void applyMovement(double[] moveValue, double power)
     {
-        for (int i = 0; i < drive.length; i++) {
+        for (int i = 0; i < 4; i++) {
             drive[i].setPower(moveValue[i] * power);
         }
     }
@@ -175,15 +183,32 @@ public class DriveTrain {
      * <STRONG>Soon to be deprecated</STRONG>
      * @author Harvey Clauss
      * @apiNote This method does not check if the drivetrain is ready. Ensure that {@link #DriveReady} is true before calling this method.
-     * @param milli
-     * @param power
+     * @param milliseconds time in milliseconds to drive
+     * @param power the power level to apply to the motors (0.0 to 1.0)
      * @param movement
      */
-    public void timeDrive(long milli, double power, MoveType movement)
+    public void timeDrive(long milliseconds, double power, MoveType movement)
     {
         applyMovement(DriveTrain.moveValues[movement.ordinal()], power);
-        opMode.sleep(milli);
+        opMode.sleep(milliseconds);
         stop();
     }
+    /**
+     * Drives the robot for a specified distance with a given power and movement type.
+     * @author Harvey Clauss
+     * @apiNote This method does not check if the drivetrain is ready. Ensure that {@link #DriveReady} is true before calling this method.
+     * @param distance the distance to drive in inches
+     * @param power the power level to apply to the motors (0.0 to 1.0)
+     * @param movement the type of movement to perform (e.g., FORWARD, BACKWARD, STRAFE_LEFT, STRAFE_RIGHT)
+     * @see MoveType
+     * @todo Implement the logic to calculate the required encoder counts based on the distance and power
+     */
+    public void distanceDrive(double distance, double power, MoveType movement)
+    {
 
+    }
+    public void turn(double angle, double power)
+    {
+
+    }
 }

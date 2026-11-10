@@ -12,7 +12,9 @@ public class FTC_Autonomous extends LinearOpMode {
         return Math.max(min, Math.min(max, val));
     }
 
-
+    /**
+     * The drive train controller for the robot
+     */
     public DriveTrain driveTrain;
 
 
