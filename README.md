@@ -154,6 +154,27 @@ Planned storage for goBILDA CAD resources and mechanical component references. T
 
 **Important:** This repository is a source-code repository, not a complete standalone FTC SDK or Android Studio project. Some source files require corrections before successful compilation and deployment.
 
+### GitHub Codespaces
+
+The repository includes a development-container configuration with Java 17,
+Android SDK 30, Gradle, and FTC SDK 12.0 compile-time classes.
+
+1. Open the repository on GitHub.
+2. Select **Code**, then **Codespaces**.
+3. Create a codespace on the branch you want to edit.
+4. Wait for the initial `./gradlew compileDebugJavaWithJavac` build to finish.
+
+FTC imports and Java autocomplete should become available after Gradle finishes
+syncing. Run the same check again at any time with:
+
+```bash
+./gradlew compileDebugJavaWithJavac
+```
+
+The Codespace validates and edits TeamCode, but deploying to a Control Hub still
+requires the complete FTC Robot Controller project and Android Studio or the
+usual FTC deployment workflow.
+
 ## 🔧 Hardware Configuration
 
 The TeleOp source references a robot configuration named:
