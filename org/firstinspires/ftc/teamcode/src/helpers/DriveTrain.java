@@ -75,7 +75,11 @@ public class DriveTrain {
             }
         }
     }
-
+    /**
+    * Reloads the four drivetrain motors and updates the drive-ready status.
+     *
+    * @return {@code true} when all four drivetrain motors are available
+    */
     public boolean refresh()
     {
         frontLeft = opMode.hardwareMap.get(DcMotor.class, "frontLeft");
