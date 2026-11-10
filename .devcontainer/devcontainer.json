@@ -1,0 +1,25 @@
+{
+  "name": "FTC Steel Surge",
+  "image": "mcr.microsoft.com/devcontainers/java:1-17-bookworm",
+  "features": {
+    "ghcr.io/nordcominc/devcontainer-features/android-sdk:2": {
+      "platform": "30",
+      "build_tools": "35.0.0",
+      "disable_openjdk_installation": true
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vscjava.vscode-gradle"
+      ],
+      "settings": {
+        "java.configuration.updateBuildConfiguration": "automatic",
+        "java.import.gradle.wrapper.enabled": true
+      }
+    }
+  },
+  "postCreateCommand": "./gradlew --no-daemon compileDebugJavaWithJavac",
+  "remoteUser": "vscode"
+}
