@@ -1,7 +1,7 @@
 {
   "java.import.gradle.enabled": false,
   "java.project.sourcePaths": [
-    "src"
+    "src/main/java"
   ],
   "java.project.outputPath": "bin",
   "java.signatureHelp.description.enabled": true,
