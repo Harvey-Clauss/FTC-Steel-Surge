@@ -108,15 +108,17 @@ public class DriveTrain {
         backLeft.setPower(powers[2]);
         backRight.setPower(powers[3]);
     }
-    private static void applyMovement(double[] moveValue, double power)
+    private void applyMovement(double[] moveValue, double power)
     {
-        if (driveTrain != null) for (int i = 0; i < 4; i++) driveTrain.drive[i].setPower(moveValue[i] * power);
+        for (int i = 0; i < drive.length; i++) {
+            drive[i].setPower(moveValue[i] * power);
+        }
     }
     public void timeDrive(long milli, double power, MoveType movement)
     {
         applyMovement(DriveTrain.moveValues[movement.ordinal()], power);
-        sleep(milli);
-        stopDrive();
+        opMode.sleep(milli);
+        stop();
     }
 
 }
