@@ -90,7 +90,8 @@ FTC-Steel-Surge/
 ├── LICENSE
 ├── src/
 │   ├── FTC_TeleOp.java
-│   ├── FTC_Autonomous.java
+│   ├── auto/
+│   │   └── FTC_Autonomous.java
 │   └── helpers/
 │       ├── DriveTrain.java
 │       └── IMU_Controller.java
