@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode;
 
 import org.firstinspires.ftc.teamcode.helpers.DriveTrain;
+import org.firstinspires.ftc.teamcode.helpers.Mechanism;
+
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+//import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @TeleOp(name = "Main - Controller", group = "Steel Surge")
 public class FTC_TeleOp extends LinearOpMode {
@@ -14,42 +16,12 @@ public class FTC_TeleOp extends LinearOpMode {
     //Custom clamp function
     public static double clamp(double val, double min, double max) { return (double)Math.max(min, (double)Math.min(max, val)); } 
     public DriveTrain driveTrain;
+    public Mechanism mechanism;
 
     @Override
     public void runOpMode() {
         driveTrain = new DriveTrain(this);
-        /*
-                        MECHANISM MOTORS:
-                        gets all mechanism motors/servos.
-                
-                !!MUST BE USING "Steel Surge - Main" Configuration!!                   
-         */
-        DcMotor intake = hardwareMap.tryGet(DcMotor.class, "intake");
-        DcMotor midtake_Front = hardwareMap.tryGet(DcMotor.class, "midtake_1");
-        CRServo midtake_Back = hardwareMap.tryGet(CRServo.class, "midtake_2");
-        DcMotor outakeLeft = hardwareMap.tryGet(DcMotor.class, "outakeLeft");
-        DcMotor outakeRight = hardwareMap.tryGet(DcMotor.class, "outakeRight");
-
-        
-        //midtake_back is a CRServo and is not included in the mechanisms array. It is controlled separately.
-        DcMotor[] mechanisms = {
-            intake,
-            midtake_Front,
-            outakeLeft,
-            outakeRight
-        };
-
-        // ==========================================
-        // MECHANISM MOTOR SETUP
-        // ==========================================
-        for (DcMotor motor : mechanisms) {
-
-            if (motor != null) {
-                motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                motor.setPower(0);
-            }
-        }
-
+        mechanism = new Mechanism(this);        
         // ==========================================
         // INITIAL TELEMETRY
         // ==========================================
@@ -142,16 +114,9 @@ public class FTC_TeleOp extends LinearOpMode {
                 //Outake controls
                 if (gamepad2.left_trigger >= .20) outakePower = .45;
 
-                // ==========================================
-                // APPLY MECHANISM POWER
-                // ==========================================
-                if (intake != null) intake.setPower(intakePower);
-                
-                if (midtake_Front != null) midtake_Front.setPower(f_midtakePower);          
-                if (midtake_Back != null) midtake_Back.setPower(b_midtakePower);
+                mechanism.applyInput(intakePower, f_midtakePower, b_midtakePower, outakePower);
 
-                if (outakeLeft != null) outakeLeft.setPower(-outakePower);            
-                if (outakeRight != null) outakeRight.setPower(outakePower);
+
                 
                 // ==========================================
                 // TELEMETRY
@@ -169,15 +134,8 @@ public class FTC_TeleOp extends LinearOpMode {
             }
 
         } finally {
-
-            // ==========================================
-            // STOP ALL MOTORS
-            // ==========================================
             if (driveTrain != null) driveTrain.stop(); //Drive motors are set to 0 power when the opmode is stopped.
-                         
-            for (DcMotor motor : mechanisms) if (motor != null) motor.setPower(0); //Mechanism motors are set to 0 power when the opmode is stopped.
-                       
-            if (midtake_Back != null) midtake_Back.setPower(0); //Back midtake is a CRServo and is set to 0 power when the opmode is stopped.
+            if (mechanism != null) mechanism.stopAll(); //Mechanism motors are set to 0 power when the opmode is stopped.
         }
     }
 }
