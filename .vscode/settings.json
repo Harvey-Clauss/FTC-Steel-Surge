@@ -1,0 +1,10 @@
+{
+  "java.import.gradle.enabled": true,
+  "java.import.gradle.java.home": "/usr/lib/jvm/msopenjdk-current",
+  "java.project.sourcePaths": [
+    "src/main/java"
+  ],
+  "java.project.outputPath": "bin",
+  "java.signatureHelp.description.enabled": true,
+  "java.completion.enabled": true
+}

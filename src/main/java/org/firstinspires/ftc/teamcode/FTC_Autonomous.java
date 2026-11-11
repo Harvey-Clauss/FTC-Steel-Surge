@@ -8,9 +8,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 public class FTC_Autonomous extends LinearOpMode {
 
 
-    public static double clamp(double val, double min, double max) { return (double)Math.max(min, (double)Math.min(max, val)); } 
+    public static double clamp(double val, double min, double max) {
+        return Math.max(min, Math.min(max, val));
+    }
 
-
+    /**
+     * The drive train controller for the robot
+     */
     public DriveTrain driveTrain;
 
 

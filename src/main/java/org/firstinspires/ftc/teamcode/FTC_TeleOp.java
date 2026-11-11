@@ -165,6 +165,7 @@ public class FTC_TeleOp extends LinearOpMode {
 
                 telemetry.update();
                 idle();
+                driveTrain.refresh();
             }
 
         } finally {
