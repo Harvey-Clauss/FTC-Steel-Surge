@@ -2,7 +2,7 @@
 
 **FIRST Tech Challenge | Robot Control Software | Java**
 
-**Version: 0.1.0 — pre-release (active development)**
+**Version: 0.1.1 — pre-release (active development)**
 
 Welcome to the official GitHub repository for **FTC Steel Surge**, a robotics team participating in the FIRST Tech Challenge (FTC).
 
