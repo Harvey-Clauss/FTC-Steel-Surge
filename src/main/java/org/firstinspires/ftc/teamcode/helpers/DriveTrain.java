@@ -6,9 +6,16 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 /**
  * This class represents the drivetrain of a robot, providing methods to control the motors and manage movement.
  * It is designed to work with a four-motor drivetrain configuration, allowing for various movement types
+ *
+ * <p>Usage Example:</p>
+ * <pre>{@code
+ * DriveTrain driveTrain = new DriveTrain(opMode);
+ * if (driveTrain.DriveReady) {
+ *     driveTrain.timeDrive(1000, 0.5, DriveTrain.MoveType.FORWARD);
+ * }}</pre>
  * @author Harvey Clauss
- * @version 1.0
- * @since 11/10/2026
+ * @version 0.1.0
+ * @since 0.1.0
  */
 public class DriveTrain {
     // Define the properties and methods for the DriveTrain class here
@@ -33,7 +40,7 @@ public class DriveTrain {
      * The movement types are defined in the {@link MoveType} enum.
      * @apiNote The values in this array should be used in conjunction with the {@link #applyMovement(double[], double)} method to control the drivetrain.
      * @author Harvey Clauss
-     * @since 1.0
+     * @since 0.1.0
      * @see MoveType
     */
     public static final double[][] MoveValues =
@@ -48,7 +55,7 @@ public class DriveTrain {
     /**
      * Enumerates the different types of movement that the drivetrain can perform.
      * @author Harvey Clauss
-     * @since 1.0
+     * @since 0.1.0
      */
     public static enum MoveType
     {
@@ -60,6 +67,13 @@ public class DriveTrain {
         STRAFE_LEFT
     }
 
+    /**
+     * Creates the drivetrain and initializes its motors from the OpMode hardware map.
+     * @param opMode the active linear OpMode
+     * @author Harvey Clauss
+     * @since 0.1.0
+     * @see LinearOpMode
+     */
     public DriveTrain(LinearOpMode opMode) {
         this.opMode = opMode;
         frontLeft = opMode.hardwareMap.get(DcMotor.class, "frontLeft");
@@ -81,6 +95,7 @@ public class DriveTrain {
     /**
      * Sets the default direction of each motor in the drivetrain.
      * @author Harvey Clauss
+     * @since 0.1.0
      * @apiNote This method should be called during initialization to set the default direction for each motor.
      */
     private void INIT_setMotorDirection()
@@ -97,6 +112,7 @@ public class DriveTrain {
      * Sets the zero power behavior for each motor in the drivetrain.
      * @apiNote This method should be called during initialization to set the zero power behavior for each motor.
      * @author Harvey Clauss
+     * @since 0.1.0
      */
     private void INIT_zeroPowerBehavior()
     {
@@ -112,6 +128,8 @@ public class DriveTrain {
     * @apiNote This method should be called if the drivetrain motors are changed or reconfigured during runtime.
     * @return {@code true} when all four drivetrain motors are available
     * @author Harvey Clauss
+    * @since 0.1.0
+    * @see #DriveReady
     */
     public boolean refresh()
     {
@@ -127,6 +145,8 @@ public class DriveTrain {
      * Stops all motors in the drivetrain.
      * @apiNote This method does not check if the drivetrain is ready. Ensure that {@link #DriveReady} is true before calling this method.
      * @author Harvey Clauss
+     * @since 0.1.0
+     * @see #setPower(double[])
      */
     public void stop()
     {
@@ -143,6 +163,9 @@ public class DriveTrain {
      * @param frontRightPower
      * @param backLeftPower
      * @param backRightPower
+     * @since 0.1.0
+     * @see #setPower(double[])
+     * @see #stop()
      */
     public void setPower(double frontLeftPower, double frontRightPower, double backLeftPower, double backRightPower)
     {
@@ -156,6 +179,9 @@ public class DriveTrain {
      * @author Harvey Clauss
      * @apiNote This method does not check if the drivetrain is ready. Ensure that {@link #DriveReady} is true before calling this method.
      * @param powers an array of power values for each motor
+     * @since 0.1.0
+     * @see #setPower(double, double, double, double)
+     * @see #stop()
      */
     public void setPower(double[] powers)
     {
@@ -170,7 +196,8 @@ public class DriveTrain {
      * @param power magnitude of power to apply to the motors (0.0 to 1.0)
      * @author Harvey Clauss
      * @apiNote This method applies power magnitude uniformly to all motors based on the provided movement values.
-     * @see #moveValues
+     * @see #MoveValues
+     * @since 0.1.0
      */
     private void applyMovement(double[] moveValue, double power)
     {
@@ -182,9 +209,11 @@ public class DriveTrain {
      * Applies the specified movement values to the drivetrain motors with the given power for each motor.
      * @author Harvey Clauss
      * @apiNote This method allows for individual power levels to be applied to each motor based on the provided movement values. Ensure that the length of the power array matches the number of motors in the drivetrain.
-     * @see MoveValues
+     * @see #MoveValues
+     * @see MoveType
      * @param moveValue
      * @param power
+     * @since 0.1.0
      */    
     private void applyMovement(double[] moveValue, double[] power)
     {
@@ -201,6 +230,9 @@ public class DriveTrain {
      * @param power the power level to apply to the motors (0.0 to 1.0)
      * @param movement
      * @see MoveType
+     * @see #MoveValues
+     * @see #stop()
+     * @since 0.1.0
      */
     public void timeDrive(long milliseconds, double power, MoveType movement)
     {
@@ -223,7 +255,9 @@ public class DriveTrain {
      * @param power the power level to apply to the motors (0.0 to 1.0)
      * @param movement the type of movement to perform (e.g., FORWARD, BACKWARD, STRAFE_LEFT, STRAFE_RIGHT)
      * @see MoveType
+     * @see #MoveValues
      * @todo Implement the logic to calculate the required encoder counts based on the distance and power
+     * @since 0.1.0
      */
     public void distanceDrive(double distance, double power, MoveType movement)
     {
@@ -245,7 +279,14 @@ public class DriveTrain {
             applyMovement(DriveTrain.MoveValues[movement.ordinal()], powers);
         }   
     }
-    public void turn(double angle, double power)
+    /**
+     * Turns the robot by a specified angle with a given maximum power.
+     * @author Harvey Clauss
+     * @param angle the angle to turn in degrees
+     * @param maxPower maximum power to apply to the motors (0.0 to maxPower)
+     * @since 0.1.0
+     */
+    public void turn(double angle, double maxPower)
     {
 
     }

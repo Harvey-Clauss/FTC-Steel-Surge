@@ -2,6 +2,8 @@
 
 **FIRST Tech Challenge | Robot Control Software | Java**
 
+**Version: 0.1.0 — pre-release (active development)**
+
 Welcome to the official GitHub repository for **FTC Steel Surge**, a robotics team participating in the FIRST Tech Challenge (FTC).
 
 This repository contains the Java-based software used to control our competition robot, including drivetrain movement, gamepad input, game-piece handling mechanisms, and autonomous routines.
@@ -255,6 +257,14 @@ Potential future improvements include:
 - [ ] Expand telemetry and diagnostic tools
 - [ ] Complete the goBILDA CAD library
 - [ ] Add automated testing and documentation
+
+## 🔢 Versioning
+
+To update the project version, run **README Version Bump** from the repository's
+GitHub Actions tab on the branch to update. Choose **bug-fix**, **minor-update**,
+or **major-update**; the workflow applies the corresponding patch, minor, or
+major version increment and commits the README change to that branch. The
+pre-release label remains while the project is in active development.
 
 ## 🤝 Contributing
 
