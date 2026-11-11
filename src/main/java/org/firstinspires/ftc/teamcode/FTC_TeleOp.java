@@ -30,13 +30,7 @@ public class FTC_TeleOp extends LinearOpMode {
 
         telemetry.addData("Drive", driveTrain != null && driveTrain.DriveReady ? "READY" : "MISSING MOTOR");
 
-        telemetry.addData("Intake", intake == null ? "MISSING" : "OK" );
-
-        telemetry.addData("Front Midtake", midtake_Front == null ? "MISSING" : "OK");
-        telemetry.addData("Back Midtake", midtake_Back == null ? "MISSING" : "OK");
-
-        telemetry.addData("Outake Left", outakeLeft == null ? "MISSING" : "OK");
-        telemetry.addData("Outake Right", outakeRight == null ? "MISSING" : "OK");
+        telemetry.addData("Mechanism", mechanism != null && mechanism.mecReady ? "READY" : "MISSING MOTOR");
 
         telemetry.update();
 
