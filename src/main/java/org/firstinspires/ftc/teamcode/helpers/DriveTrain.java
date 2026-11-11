@@ -36,7 +36,7 @@ public class DriveTrain {
      * @since 1.0
      * @see MoveType
     */
-    public static final double[][] moveValues =
+    public static final double[][] MoveValues =
     {
         {1.0, 1.0, 1.0, 1.0}, // Forward
         {-1.0, -1.0, -1.0, -1.0}, //Backward 
@@ -179,6 +179,20 @@ public class DriveTrain {
         }
     }
     /**
+     * Applies the specified movement values to the drivetrain motors with the given power for each motor.
+     * @author Harvey Clauss
+     * @apiNote This method allows for individual power levels to be applied to each motor based on the provided movement values. Ensure that the length of the power array matches the number of motors in the drivetrain.
+     * @see MoveValues
+     * @param moveValue
+     * @param power
+     */    
+    private void applyMovement(double[] moveValue, double[] power)
+    {
+        for (int i = 0; i < 4; i++) {
+            drive[i].setPower(moveValue[i] * power[i]);
+        }
+    }
+    /**
      * Drives the robot for a specified duration with a given power and movement type.
      * <STRONG>Soon to be deprecated</STRONG>
      * @author Harvey Clauss
@@ -186,13 +200,21 @@ public class DriveTrain {
      * @param milliseconds time in milliseconds to drive
      * @param power the power level to apply to the motors (0.0 to 1.0)
      * @param movement
+     * @see MoveType
      */
     public void timeDrive(long milliseconds, double power, MoveType movement)
     {
-        applyMovement(DriveTrain.moveValues[movement.ordinal()], power);
+        applyMovement(DriveTrain.MoveValues[movement.ordinal()], power);
         opMode.sleep(milliseconds);
         stop();
     }
+
+    private double ticksPerRev = 537.7;
+    private double wheelDiameterInches = 4.0;
+    private double gearRatio = 1.0; // Assuming a 1:1 gear ratio for simplicity; adjust as necessary
+
+    private double tolerance = 0.25; // Tolerance in inches for stopping the drive
+
     /**
      * Drives the robot for a specified distance with a given power and movement type.
      * @author Harvey Clauss
@@ -205,7 +227,23 @@ public class DriveTrain {
      */
     public void distanceDrive(double distance, double power, MoveType movement)
     {
-
+        double[] powers = new double[4];
+        double ticks = 0;
+        double distanceInches = 0;
+        for (DcMotor motor : drive) {
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+        
+        while (Math.abs(distance - distanceInches) >= tolerance)
+        {
+            for (int i = 0; i < 4; i++) {
+                ticks = drive[i].getCurrentPosition();
+                distanceInches = (ticks / ticksPerRev) * (Math.PI * wheelDiameterInches) * gearRatio;
+                powers[i] = (distance - distanceInches) / distance;
+            }
+            applyMovement(DriveTrain.MoveValues[movement.ordinal()], powers);
+        }   
     }
     public void turn(double angle, double power)
     {
