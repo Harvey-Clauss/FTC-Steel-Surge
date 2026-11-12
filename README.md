@@ -261,11 +261,13 @@ Potential future improvements include:
 
 ## 🔢 Versioning
 
-To update the project version, run **README Version Bump** from the repository's
-GitHub Actions tab on the branch to update. Choose **bug-fix**, **minor-update**,
-or **major-update**; the workflow applies the corresponding patch, minor, or
-major version increment and commits the README change to that branch. The
-pre-release label remains while the project is in active development.
+When a pull request is merged, **README Version Bump** checks each commit
+subject in order. Start a subject with `bug-fix`, `minor`, or `major` followed
+by a space or colon (for example, `bug-fix: correct motor direction`) to request
+a patch, minor, or major increment. Every matching commit applies one increment
+in order; if none match, the version is unchanged. The workflow commits the
+updated version to the pull request's base branch. The pre-release label remains
+while the project is in active development.
 
 ## 🤝 Contributing
 

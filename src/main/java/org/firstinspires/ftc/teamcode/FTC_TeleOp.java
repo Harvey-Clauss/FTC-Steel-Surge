@@ -49,7 +49,6 @@ public class FTC_TeleOp extends LinearOpMode {
         try {
 
             while (opModeIsActive()) {
-                //#region Drive
 
                 // ==========================================
                 // DRIVE
@@ -81,7 +80,6 @@ public class FTC_TeleOp extends LinearOpMode {
 
                     driveTrain.setPower(powers);
                 }
-//#endregion
 
                 double intakePower = 0.0;
                 double f_midtakePower = 0.0;

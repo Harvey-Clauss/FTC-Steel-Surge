@@ -1,81 +1,105 @@
 name: README Version Bump
 
 on:
-  workflow_dispatch:
-    inputs:
-      commit_type:
-        description: Select the type of update to apply to the README version
-        required: true
-        type: choice
-        options:
-          - bug-fix
-          - minor-update
-          - major-update
+  pull_request_target:
+    types: [closed]
 
 permissions:
   contents: write
+  pull-requests: read
 
 jobs:
   bump-version:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out selected branch
+      - name: Check out base branch
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
 
-      - name: Bump README version
+      - name: Get pull request commits
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh api --paginate --slurp \
+            "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/commits?per_page=100" \
+            > "$RUNNER_TEMP/pr-commits.json"
+
+      - name: Bump README version from commit subjects
         id: version
         env:
-          COMMIT_TYPE: ${{ inputs.commit_type }}
+          COMMITS_FILE: ${{ runner.temp }}/pr-commits.json
         run: |
           python3 - <<'PY'
+          import json
           import os
           import re
           from pathlib import Path
 
-          readme = Path("README.md")
-          content = readme.read_text()
-          pattern = re.compile(
+          commits_data = json.loads(Path(os.environ["COMMITS_FILE"]).read_text())
+          commits = [commit for page in commits_data for commit in page]
+          markers = re.compile(r"^(major|minor|bug-fix)(?:$|[ :])", re.IGNORECASE)
+          update_pattern = re.compile(
               r"(?m)^\*\*Version: (\d+)\.(\d+)\.(\d+)( — pre-release \(active development\))?\*\*$"
           )
-          match = pattern.search(content)
+
+          readme = Path("README.md")
+          content = readme.read_text()
+          match = update_pattern.search(content)
           if match is None:
               raise SystemExit("Could not find the README version line.")
 
           major, minor, patch = map(int, match.group(1, 2, 3))
-          commit_type = os.environ["COMMIT_TYPE"]
-          if commit_type == "bug-fix":
-              patch += 1
-          elif commit_type == "minor-update":
-              minor += 1
-              patch = 0
-          elif commit_type == "major-update":
-              major += 1
-              minor = 0
-              patch = 0
-          else:
-              raise SystemExit(f"Unsupported commit type: {commit_type}")
+          matched_markers = []
+          for commit in commits:
+              subject = commit["commit"]["message"].splitlines()[0].strip()
+              marker = markers.match(subject)
+              if marker is None:
+                  continue
+
+              kind = marker.group(1).lower()
+              matched_markers.append(kind)
+              if kind == "bug-fix":
+                  patch += 1
+              elif kind == "minor":
+                  minor += 1
+                  patch = 0
+              else:
+                  major += 1
+                  minor = 0
+                  patch = 0
+
+          if not matched_markers:
+              print("No version markers found; leaving the README unchanged.")
+              with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+                  output.write("bumped=false\n")
+              raise SystemExit(0)
 
           new_version = f"{major}.{minor}.{patch}"
           suffix = match.group(4) or ""
           updated_line = f"**Version: {new_version}{suffix}**"
-          readme.write_text(content[:match.start()] + updated_line + content[match.end():])
+          readme.write_text(
+              content[:match.start()] + updated_line + content[match.end():]
+          )
           with open(os.environ["GITHUB_OUTPUT"], "a") as output:
-              output.write(f"new_version={new_version}\n")
-          print(f"Updated README version to {new_version}.")
+              output.write(f"bumped=true\nnew_version={new_version}\n")
+          print(
+              f"Applied {len(matched_markers)} version marker(s); "
+              f"updated README version to {new_version}."
+          )
           PY
 
       - name: Commit and push README version
+        if: steps.version.outputs.bumped == 'true'
         env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
           NEW_VERSION: ${{ steps.version.outputs.new_version }}
         run: |
-          if [[ "$GITHUB_REF" != refs/heads/* ]]; then
-            echo "Run this workflow on a branch, not a tag." >&2
-            exit 1
-          fi
-
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -- README.md
           git commit -m "docs: bump README version to $NEW_VERSION"
-          git push origin "$GITHUB_REF"
+          git push origin "$BASE_REF"
